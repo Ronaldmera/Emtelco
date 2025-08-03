@@ -2,11 +2,13 @@
      <aside id="sidebar-wrapper">
          <div class="sidebar-brand">
              <a href="index.html">
-                <img src="backend/assets/img/LogoEmtelco/Logo_Emtelco.png" alt="" class= w-50 h-50>
+                 <img src="backend/assets/img/LogoEmtelco/Logo_Emtelco.png" alt="" class=w-50 h-50>
              </a>
          </div>
          <div class="sidebar-brand sidebar-brand-sm">
-             <a href="index.html">St</a>
+             <a href="index.html">
+                 <img src="backend/assets/img/LogoEmtelco/Logo_Emtelco.png" alt="" class=w-75 h-50>
+             </a>
          </div>
          <ul class="sidebar-menu">
              <li class="menu-header">Opciones</li>
@@ -19,8 +21,10 @@
                      <li><a class="nav-link" href="layout-top-navigation.html">Top Navigation</a></li>
                  </ul>
              </li> --}}
-             <li><a class="nav-link" href="blank.html"><i class="bi bi-box text-primary"></i> <span>Materiales faltantes</span></a></li>
-             <li><a class="nav-link" href="blank.html"><i class="bi bi-arrow-counterclockwise text-primary"></i> <span>Logistica Inversa
+             <li><a class="nav-link" href="blank.html"><i class="bi bi-box text-primary"></i> <span>Materiales
+                         faltantes</span></a></li>
+             <li><a class="nav-link" href="blank.html"><i class="bi bi-arrow-counterclockwise text-primary"></i>
+                     <span>Logistica Inversa
                      </span></a></li>
      </aside>
  </div>

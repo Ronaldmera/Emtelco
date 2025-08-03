@@ -63,7 +63,7 @@
 }
 
 a {
-    color: #6777ef;
+    /* color: #6777ef; */
     font-weight: 500;
     transition: all 0.5s;
     -webkit-transition: all 0.5s;
@@ -114,49 +114,49 @@ a:not(.btn-social-icon):not(.btn-social):not(.page-link) .fab {
 .text-primary-all *,
 .text-primary-all *:before,
 .text-primary-all *:after {
-    color: #6777ef !important;
+    /* color: #6777ef !important; */
 }
 
 .text-secondary,
 .text-secondary-all *,
 .text-secondary-all *:before,
 .text-secondary-all *:after {
-    color: #cdd3d8 !important;
+    /* color: #cdd3d8 !important; */
 }
 
 .text-success,
 .text-success-all *,
 .text-success-all *:before,
 .text-success-all *:after {
-    color: #63ed7a !important;
+    /* color: #63ed7a !important; */
 }
 
 .text-info,
 .text-info-all *,
 .text-info-all *:before,
 .text-info-all *:after {
-    color: #3abaf4 !important;
+    /* color: #3abaf4 !important; */
 }
 
 .text-warning,
 .text-warning-all *,
 .text-warning-all *:before,
 .text-warning-all *:after {
-    color: #ffa426 !important;
+    /* color: #ffa426 !important; */
 }
 
 .text-danger,
 .text-danger-all *,
 .text-danger-all *:before,
 .text-danger-all *:after {
-    color: #fc544b !important;
+    /* color: #fc544b !important; */
 }
 
 .text-light,
 .text-light-all *,
 .text-light-all *:before,
 .text-light-all *:after {
-    color: #e3eaef !important;
+    /* color: #e3eaef !important; */
 }
 
 .text-white,
