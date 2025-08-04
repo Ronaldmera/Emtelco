@@ -21,7 +21,8 @@
                      <li><a class="nav-link" href="layout-top-navigation.html">Top Navigation</a></li>
                  </ul>
              </li> --}}
-             <li><a class="nav-link" href="blank.html"><i class="bi bi-box text-primary"></i> <span>Materiales
+             <li><a class="nav-link" href="{{ route('material.showMissingMaterials') }}"><i
+                         class="bi bi-box text-primary"></i> <span>Materiales
                          faltantes</span></a></li>
              <li><a class="nav-link" href="blank.html"><i class="bi bi-arrow-counterclockwise text-primary"></i>
                      <span>Logistica Inversa
