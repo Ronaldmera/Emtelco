@@ -8,3 +8,4 @@ Route::get('/', function () {
 })->name('welcome');
 
 Route::get('/missingMaterials', [MaterialController::class, 'showMissingMaterials'])->name('material.showMissingMaterials');
+Route::post('/uploadExcel', [MaterialController::class, 'excelInput'])->name('material.excelInput');
