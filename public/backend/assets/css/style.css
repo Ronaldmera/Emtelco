@@ -78,6 +78,35 @@ a:not(.btn-social-icon):not(.btn-social):not(.page-link) .fab {
     margin-left: 4px;
 }
 
+/* estilos validacion archivos cargados en form */
+.alert-validation {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    padding: 10px 15px;
+    border-radius: 5px;
+    color: #fff;
+    font-weight: bold;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    transition: opacity 0.5s ease-out;
+}
+
+/* Éxito */
+.alert-validation.success {
+    background-color: #28a745;
+}
+
+/* Error */
+.alert-validation.error {
+    background-color: #dc3545;
+}
+
+/* Animación fade */
+.fade-out {
+    opacity: 0;
+}
+
 /* .bg-primary {
     background-color: #67a2ef !important;
 } */
@@ -108,55 +137,6 @@ a:not(.btn-social-icon):not(.btn-social):not(.page-link) .fab {
 
 .bg-dark {
     background-color: #191d21 !important;
-}
-
-.text-primary,
-.text-primary-all *,
-.text-primary-all *:before,
-.text-primary-all *:after {
-    /* color: #6777ef !important; */
-}
-
-.text-secondary,
-.text-secondary-all *,
-.text-secondary-all *:before,
-.text-secondary-all *:after {
-    /* color: #cdd3d8 !important; */
-}
-
-.text-success,
-.text-success-all *,
-.text-success-all *:before,
-.text-success-all *:after {
-    /* color: #63ed7a !important; */
-}
-
-.text-info,
-.text-info-all *,
-.text-info-all *:before,
-.text-info-all *:after {
-    /* color: #3abaf4 !important; */
-}
-
-.text-warning,
-.text-warning-all *,
-.text-warning-all *:before,
-.text-warning-all *:after {
-    /* color: #ffa426 !important; */
-}
-
-.text-danger,
-.text-danger-all *,
-.text-danger-all *:before,
-.text-danger-all *:after {
-    /* color: #fc544b !important; */
-}
-
-.text-light,
-.text-light-all *,
-.text-light-all *:before,
-.text-light-all *:after {
-    /* color: #e3eaef !important; */
 }
 
 .text-white,
@@ -211,11 +191,21 @@ ol {
 }
 
 /* 3.2 Form */
+input[type="file"]::file-selector-button {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    position: relative;
+    top: 2px;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
 .form-control,
 .input-group-text,
 .custom-select,
 .custom-file-label {
-    background-color: #fdfdff;
+    background-color: #fdfeff;
     border-color: #e4e6fc;
 }
 .form-control:focus,
@@ -230,7 +220,6 @@ ol {
 select.form-control:not([size]):not([multiple]),
 .form-control:not(.form-control-sm):not(.form-control-lg) {
     font-size: 14px;
-    padding: 10px 15px;
     height: 42px;
 }
 
@@ -256,27 +245,6 @@ select.form-control:not([size]):not([multiple]) {
     background-repeat: no-repeat;
     background-size: 40px;
     padding-right: 60px;
-}
-.form-control.creditcard.visa {
-    background-image: url("../img/visa.png");
-}
-.form-control.creditcard.americanexpress {
-    background-image: url("../img/americanexpress.png");
-}
-.form-control.creditcard.dinersclub {
-    background-image: url("../img/dinersclub.png");
-}
-.form-control.creditcard.discover {
-    background-image: url("../img/discover.png");
-}
-.form-control.creditcard.jcb {
-    background-image: url("../img/jcb.png");
-}
-.form-control.creditcard.mastercard {
-    background-image: url("../img/mastercard.png");
-}
-.form-control.creditcard.visa {
-    background-image: url("../img/visa.png");
 }
 
 .form-group {
@@ -1876,8 +1844,8 @@ h6 .badge {
 .btn-outline-primary.disabled:hover,
 .btn-outline-primary.disabled:focus,
 .btn-outline-primary.disabled:active {
-    background-color: #6777ef !important;
-    color: #fff;
+    background-color: #bee6f3 !important;
+    color: #30287c;
 }
 
 .btn-outline-white,

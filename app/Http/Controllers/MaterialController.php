@@ -1,8 +1,10 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\Validator;
 
 use Illuminate\Http\Request;
+
 
 class MaterialController extends Controller
 {
@@ -11,20 +13,27 @@ class MaterialController extends Controller
     }
 
 
-    public function excelInput(Request $request)
-    {
-        $request->validate([
-            'excel_files' => 'required',
-            'excel_files.*' => 'mimes:xls,xlsx|max:2048'
-        ]);
+public function excelInput(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'excel_files' => 'required',
+        'excel_files.*' => 'mimes:xls,xlsx|max:2048'
+    ]);
 
-        foreach ($request->file('excel_files') as $archivo) {
-            $nombre = time() . '_' . $archivo->getClientOriginalName();
-            $archivo->storeAs('excels', $nombre, 'public');
-        }
-
-        return response()->json(['message' => 'Archivos subidos correctamente.']);
+    if ($validator->fails()) {
+        return response()->json([
+            'message' => 'Error al subir los archivos.',    
+        ], 422);
     }
+
+    foreach ($request->file('excel_files') as $archivo) {
+        $nombre = time() . '_' . $archivo->getClientOriginalName();
+        $archivo->storeAs('excels', $nombre, 'public');
+    }
+
+    return response()->json(['message' => 'Archivos subidos correctamente.']);
+}
+
 
 }
         

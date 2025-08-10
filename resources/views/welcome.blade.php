@@ -6,7 +6,7 @@
         </div>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb ">
-                <li class="breadcrumb-item active" aria-current="page">Home</li>
+                <li class="breadcrumb-item active" aria-current="page">Inicio</li>
             </ol>
         </nav>
         <div class="row justify-content-center align-items-center">
