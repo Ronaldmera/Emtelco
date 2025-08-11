@@ -17,7 +17,7 @@ public function excelInput(Request $request)
 {
     $validator = Validator::make($request->all(), [
         'excel_files' => 'required',
-        'excel_files.*' => 'mimes:xls,xlsx|max:2048'
+        'excel_files.*' => 'mimes:xls,xlsx,xlsm|max:2048'
     ]);
 
     if ($validator->fails()) {

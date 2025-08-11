@@ -22,7 +22,7 @@
                     <label for="excelFile" class="form-label">Subir archivos Excel</label>
                     <br>
                     <input class="form-control btn btn-outline-primary w-100" type="file" id="excelFile"
-                        name="excel_files[]" accept=".xls, .xlsx" multiple required>
+                        name="excel_files[]" accept=".xls, .xlsx, .xlsm" multiple required>
                 </div>
                 <button type="submit" class="btn btn-primary">Subir</button>
             </form>
