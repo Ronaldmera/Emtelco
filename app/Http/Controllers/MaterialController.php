@@ -9,7 +9,11 @@ use Illuminate\Http\Request;
 class MaterialController extends Controller
 {
     public function showMissingMaterials(){
-        return view('Materials.missingMaterials');
+          $bodegas = [
+        ['id' => 3175, 'ciudad' => 'Popayán'],
+        ['id' => 3177, 'ciudad' => 'Cali'],
+    ];
+        return view('Materials.missingMaterials', compact('bodegas'));
     }
 
 
@@ -33,7 +37,6 @@ public function excelInput(Request $request)
 
     return response()->json(['message' => 'Archivos subidos correctamente.']);
 }
-
 
 }
         

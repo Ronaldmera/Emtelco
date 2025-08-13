@@ -27,15 +27,52 @@
                 <button type="submit" class="btn btn-primary">Subir</button>
             </form>
         </div>
+        <!-- Modal para datos adicionales -->
+        <div class="modal fade mt-5 " id="extraDataModal" tabindex="-1" aria-labelledby="extraDataModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="extraDataModalLabel">Datos del Almacén</h5>
+                        <button type="button" class="btn-close-modal bg-secondary" data-bs-dismiss="modal"
+                            aria-label="Cerrar"><i class="bi bi-x-lg text-light"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="extraDataForm">
+                            @csrf
+                            <div class="mb-3">
+                                <label for="almacenId" class="form-label">Selecciona la Bodega</label>
+                                <select id="almacenId" name="almacen_id" class="form-control" required>
+                                    <option value="">-- Selecciona --</option>
+                                    @foreach ($bodegas as $bodega)
+                                        <option value="{{ $bodega['id'] }}" data-ciudad="{{ $bodega['ciudad'] }}">
+                                            {{ $bodega['id'] }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="ciudad" class="form-label">Ciudad</label>
+                                <input type="text" class="form-control" id="ciudad" name="ciudad" readonly>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Guardar Datos</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </section>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
+            // Manejo del envío del formulario Excel
             document.getElementById('excelUploadForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
 
                 const form = e.target;
                 const formData = new FormData(form);
                 const responseMsg = document.getElementById('responseMsg');
+                const btn_close_modal = document.querySelector('.btn-close-modal');
 
                 try {
                     const response = await fetch("{{ route('material.excelInput') }}", {
@@ -53,19 +90,26 @@
                         responseMsg.innerHTML =
                             `<div class="alert-validation success">${data.message}</div>`;
                         form.reset();
-                    } else {
-                        responseMsg.innerHTML =
-                            `<div class="alert-validation error">${data.message}</div>`;
-                    }
+                        // Mostrar modal para ingresar datos adicionales
+                        const modalEl = document.getElementById('extraDataModal');
+                        if (modalEl.parentElement !== document.body) {
+                            document.body.appendChild(modalEl);
 
-                    // Desaparecer con efecto fade después de 2 segundos
+                        }
+                        const modal = new bootstrap.Modal(modalEl);
+                        modal.show();
+                        btn_close_modal.addEventListener('click', () => {
+                            modal.hide();
+                        });
+                    }
+                    // Desaparecer mensaje con fade después de 2 segundos
                     setTimeout(() => {
                         const alert = responseMsg.querySelector('.alert-validation');
                         if (alert) {
                             alert.classList.add('fade-out');
                             setTimeout(() => {
                                 responseMsg.innerHTML = "";
-                            }, 500); // esperar animación
+                            }, 500);
                         }
                     }, 2000);
 
@@ -84,6 +128,16 @@
                         }
                     }, 2000);
                 }
+            });
+
+            // Autocompletar ciudad cuando se selecciona bodega
+            const almacenSelect = document.getElementById('almacenId');
+            const ciudadInput = document.getElementById('ciudad');
+
+            almacenSelect.addEventListener('change', () => {
+                const selectedOption = almacenSelect.options[almacenSelect.selectedIndex];
+                const ciudad = selectedOption.getAttribute('data-ciudad') || '';
+                ciudadInput.value = ciudad;
             });
         });
     </script>
