@@ -27,7 +27,7 @@
                 <button type="submit" class="btn btn-primary">Subir</button>
             </form>
         </div>
-        <!-- Modal para datos adicionales -->
+        {{-- Modal para datos adicionales  --}}
         <div class="modal fade mt-5 " id="extraDataModal" tabindex="-1" aria-labelledby="extraDataModalLabel"
             aria-hidden="true">
             <div class="modal-dialog">
@@ -38,7 +38,7 @@
                             aria-label="Cerrar"><i class="bi bi-x-lg text-white"></i></button>
                     </div>
                     <div class="modal-body">
-                        <form id="extraDataForm">
+                        <form id="extraDataForm" method="POST" action="{{ route('material.modalData') }}">
                             @csrf
                             <div class="mb-3">
                                 <label for="almacenId" class="form-label">Selecciona la Bodega</label>

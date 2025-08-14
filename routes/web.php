@@ -9,3 +9,4 @@ Route::get('/', function () {
 
 Route::get('/missingMaterials', [MaterialController::class, 'showMissingMaterials'])->name('material.showMissingMaterials');
 Route::post('/uploadExcel', [MaterialController::class, 'excelInput'])->name('material.excelInput');
+Route::post('/modalData', [MaterialController::class, 'modalData'])->name('material.modalData');
