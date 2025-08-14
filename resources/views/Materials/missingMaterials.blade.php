@@ -34,8 +34,8 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="extraDataModalLabel">Datos del Almacén</h5>
-                        <button type="button" class="btn-close-modal bg-secondary" data-bs-dismiss="modal"
-                            aria-label="Cerrar"><i class="bi bi-x-lg text-light"></i></button>
+                        <button type="button" class="btn-close-modal bg-dark" data-bs-dismiss="modal"
+                            aria-label="Cerrar"><i class="bi bi-x-lg text-white"></i></button>
                     </div>
                     <div class="modal-body">
                         <form id="extraDataForm">
