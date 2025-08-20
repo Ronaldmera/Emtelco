@@ -6,7 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 
 class MaterialController extends Controller
 {
@@ -23,8 +25,8 @@ class MaterialController extends Controller
     public function excelInput(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'excel_files' => 'required',
-            'excel_files.*' => 'mimes:xls,xlsx,xlsm|max:2048'
+            'excel_files'   => 'required',
+            'excel_files.*' => 'mimes:xls,xlsx,xlsm|max:20480' // hasta 20MB
         ]);
 
         if ($validator->fails()) {
@@ -45,171 +47,128 @@ class MaterialController extends Controller
             ];
         }
 
-        // Guardar en sesión
         session(['archivos_excel' => $archivosGuardados]);
 
         return response()->json([
-            'message' => 'Archivos subidos correctamente.',
+            'message'  => 'Archivos subidos correctamente.',
             'archivos' => $archivosGuardados
         ]);
     }
 
-public function modalData(Request $request)
-{
-    $idAlmacen = $this->normValue($request->input('almacen_id'));
-    $ciudad    = $this->normValue($request->input('ciudad'));
+    public function modalData(Request $request)
+    {
+        $idAlmacen = $this->normValue($request->input('almacen_id'));
+        // $ciudad    = $this->normValue($request->input('ciudad')); 
 
-    $archivosExcel = session('archivos_excel', []);
-    if (empty($archivosExcel)) {
-        return response()->json(['message' => 'No hay archivos Excel cargados en la sesión.'], 400);
-    }
+        $archivosExcel = session('archivos_excel', []);
+        if (empty($archivosExcel)) {
+            return response()->json(['message' => 'No hay archivos Excel cargados en la sesión.'], 400);
+        }
 
-    $registrosFiltrados = [];
-    $encabezadosOriginales = null;   // Mantendremos los encabezados tal cual para el archivo final
-    $ordenColumnas = null;           
+        $encabezadosOriginales = null;
+        $spreadsheetOut = new Spreadsheet();
+        $sheetOut = $spreadsheetOut->getActiveSheet();
+        $rowOut = 2;
 
-    foreach ($archivosExcel as $archivo) {
-        $ruta = storage_path("app/public/" . $archivo['ruta']);
-        $spreadsheet = IOFactory::load($ruta);
+        foreach ($archivosExcel as $archivo) {
+            $ruta = storage_path("app/public/" . $archivo['ruta']);
 
-        foreach ($spreadsheet->getAllSheets() as $hoja) {
-            $filas = $hoja->toArray(null, true, true, true); // claves A,B,C...
-            if (empty($filas) || !isset($filas[1])) continue;
+            $reader = IOFactory::createReaderForFile($ruta);
+            $reader->setReadDataOnly(false); // necesario para detectar fechas
+            $spreadsheet = $reader->load($ruta);
 
-            // 1) Detectar columnas por encabezado (tolerante a variaciones)
-            $encabezados = $filas[1]; // p.ej. ["A"=>"ALM", "B"=>"CIUDAD_EMPRESA", ...]
-            $mapa = $this->mapaEncabezados($encabezados);
+            foreach ($spreadsheet->getAllSheets() as $hoja) {
+                $highestRow = $hoja->getHighestRow();
+                $highestCol = $hoja->getHighestColumn();
+                $highestColIndex = Coordinate::columnIndexFromString($highestCol);
 
-            $colALM    = $this->buscarColumna($mapa, ['ALM','ALMACEN','IDALMACEN','ID_ALMACEN','IDALM','CODALM','COD_ALM','CODALMACEN','COD_ALMACEN']);
-            $colCIUDAD = $this->buscarColumna($mapa, ['CUIDAD_EMPRESA','CIUDAD_EMPRESA','CIUDAD','CUIDAD']); 
+                // encabezados (primera fila)
+                $mapa = [];
+                for ($col = 1; $col <= $highestColIndex; $col++) {
+                    $mapa[$col] = $this->normValue($hoja->getCellByColumnAndRow($col, 1)->getValue());
+                }
 
-            if (!$colALM || !$colCIUDAD) {
-                // Si esta hoja no trae las columnas necesarias, seguimos a la siguiente
-                continue;
-            }
+                $colALM = $this->buscarColumna($mapa, [
+                    'ALM','ALMACEN','IDALMACEN','ID_ALMACEN',
+                    'IDALM','CODALM','COD_ALM','CODALMACEN','COD_ALMACEN'
+                ]);
+                
 
-            // Guardar encabezados y orden de columnas la primera vez
-            if ($encabezadosOriginales === null) {
-                $encabezadosOriginales = $encabezados;   // para escribirlos iguales en el Excel de salida
-                $ordenColumnas = array_keys($encabezados); // p.ej. ["A","B","C",...]
-            }
 
-            // 2) Recorrer filas de datos (desde la 2)
-            foreach ($filas as $n => $fila) {
-                if ($n === 1) continue; // saltar encabezados
+                if ($colALM === null) {
+                    continue;
+                }
 
-                // Normalizar valores ALM y CIUDAD de la fila
-                $valorALM    = isset($fila[$colALM])    ? $this->normValue($fila[$colALM])    : null;
-                $valorCiudad = isset($fila[$colCIUDAD]) ? $this->normValue($fila[$colCIUDAD]) : null;
-
-                if ($valorALM === $idAlmacen && $valorCiudad === $ciudad) {
-                    // Asegurar el mismo orden de columnas al exportar
-                    $filaOrdenada = [];
-                    foreach ($ordenColumnas as $colKey) {
-                        $filaOrdenada[] = $fila[$colKey] ?? null;
+                // escribir encabezados solo una vez
+                if ($encabezadosOriginales === null) {
+                    $encabezadosOriginales = [];
+                    for ($col = 1; $col <= $highestColIndex; $col++) {
+                        $encabezadosOriginales[] = $hoja->getCellByColumnAndRow($col, 1)->getValue();
                     }
-                    $registrosFiltrados[] = $filaOrdenada;
+                    $sheetOut->fromArray([$encabezadosOriginales], null, 'A1');
+                }
+
+                // recorrer filas
+                for ($row = 2; $row <= $highestRow; $row++) {
+                    $fila = [];
+                    for ($col = 1; $col <= $highestColIndex; $col++) {
+                        $cell  = $hoja->getCellByColumnAndRow($col, $row);
+                        $valor = $cell->getValue();
+
+                        // 🔑 si es fecha => formatear a d/m/Y
+                        if (Date::isDateTime($cell) && is_numeric($valor)) {
+                            $valor = Date::excelToDateTimeObject($valor)->format('d/m/Y');
+                        }
+
+                        $fila[] = $valor;
+                    }
+
+                    $valorALM    = isset($fila[$colALM - 1]) ? $this->normValue($fila[$colALM - 1]) : null;
+                
+                    if ($valorALM === $idAlmacen ) {
+                        $sheetOut->fromArray([$fila], null, 'A' . $rowOut);
+                        $rowOut++;
+                    }
                 }
             }
         }
+
+        $fileName = 'MatFiltrados' . time() . '.xlsx';
+        $dirPublic = storage_path('app/public/excels');
+        if (!is_dir($dirPublic)) {
+            @mkdir($dirPublic, 0775, true);
+        }
+        $filePath = $dirPublic . '/' . $fileName;
+
+        $writer = new Xlsx($spreadsheetOut);
+        $writer->save($filePath);
+
+        session()->forget('archivos_excel');
+
+        return response()->download($filePath);
     }
 
-    // 3) Crear nuevo Excel con encabezados + coincidencias
-    $spreadsheetOut = new Spreadsheet();
-    $sheetOut = $spreadsheetOut->getActiveSheet();
-
-    // Encabezados en el mismo orden
-    $headersOrdenados = [];
-    foreach ($ordenColumnas as $colKey) {
-        $headersOrdenados[] = $encabezadosOriginales[$colKey] ?? $colKey;
+    private function normValue($value)
+    {
+        return strtoupper(trim((string) $value));
     }
 
-    $sheetOut->fromArray([$headersOrdenados], null, 'A1');
-    $sheetOut->fromArray($registrosFiltrados, null, 'A2');
-
-    $fileName = 'MatFiltrados' . time() . '.xlsx';
-    $dirPublic = storage_path('app/public/excels');
-    if (!is_dir($dirPublic)) {
-        @mkdir($dirPublic, 0775, true);
-    }
-    $filePath = $dirPublic . '/' . $fileName;
-
-    $writer = new Xlsx($spreadsheetOut);
-    $writer->save($filePath);
-
-    // Limpiar sesión
-    session()->forget('archivos_excel');
-
-    // return response()->json([
-    //     'message' => 'Archivo generado correctamente.',
-    //     'coincidencias' => count($registrosFiltrados),
-    //     'archivo' => asset('storage/excels/' . $fileName)
-    // ]);
-    return response()->download($filePath);
-
-}
-
-/**
- * Normaliza valores para comparar (trim, mayúsculas, tildes y espacios raros).
- */
-private function normValue($v): string
-{
-    $v = (string)$v;
-    // Reemplazar NBSP y espacios múltiples
-    $v = str_replace("\xC2\xA0", ' ', $v);
-    $v = preg_replace('/\s+/u', ' ', $v ?? '');
-    $v = trim($v);
-
-    // Mayúsculas
-    if (function_exists('mb_strtoupper')) {
-        $v = mb_strtoupper($v, 'UTF-8');
-    } else {
-        $v = strtoupper($v);
+    private function mapaEncabezados(array $encabezados)
+    {
+        $mapa = [];
+        foreach ($encabezados as $index => $encabezado) {
+            $mapa[$index] = $this->normValue($encabezado);
+        }
+        return $mapa;
     }
 
-    // Quitar tildes comunes (sin depender de iconv)
-    $repl = ['Á'=>'A','É'=>'E','Í'=>'I','Ó'=>'O','Ú'=>'U','Ü'=>'U','Ñ'=>'N'];
-    $v = strtr($v, $repl);
-
-    return $v;
-}
-
-/**
- * Normaliza encabezados para buscarlos por “clave”.
- * Quita espacios/guiones/guiones bajos/puntos y tildes.
- */
-private function normHeader($v): string
-{
-    $v = $this->normValue($v);
-    $v = str_replace([' ', '_', '-', '.'], '', $v);
-    return $v;
-}
-
-/**
- * Crea un mapa normalizado de encabezado => claveColumna (A,B,C...).
- */
-private function mapaEncabezados(array $encabezados): array
-{
-    $mapa = [];
-    foreach ($encabezados as $colKey => $titulo) {
-        $mapa[$this->normHeader($titulo)] = $colKey;
+    private function buscarColumna(array $mapa, array $nombres)
+    {
+        foreach ($mapa as $index => $encabezado) {
+            if (in_array($encabezado, $nombres)) {
+                return $index;
+            }
+        }
+        return null;
     }
-    return $mapa;
-}
-
-/**
- * Busca la primera coincidencia de una lista de posibles nombres de columna.
- * @param array $mapa  (clave normalizada => colKey)
- * @param array $posibles  (p.ej. ['ALM','ALMACEN','IDALMACEN',...])
- * @return string|null  colKey (A,B,C,...) o null si no encuentra
- */
-private function buscarColumna(array $mapa, array $posibles): ?string
-{
-    foreach ($posibles as $p) {
-        $np = $this->normHeader($p);
-        if (isset($mapa[$np])) return $mapa[$np];
-    }
-    return null;
-}
-
 }
