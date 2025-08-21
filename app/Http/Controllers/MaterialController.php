@@ -58,7 +58,6 @@ class MaterialController extends Controller
     public function modalData(Request $request)
     {
         $idAlmacen = $this->normValue($request->input('almacen_id'));
-        // $ciudad    = $this->normValue($request->input('ciudad')); 
 
         $archivosExcel = session('archivos_excel', []);
         if (empty($archivosExcel)) {
@@ -82,18 +81,20 @@ class MaterialController extends Controller
                 $highestCol = $hoja->getHighestColumn();
                 $highestColIndex = Coordinate::columnIndexFromString($highestCol);
 
-                // encabezados (primera fila)
+                // ✅ Convertimos la hoja en array
+                $data = $hoja->toArray(null, false, false, false);
+
+                // mapa de encabezados (primera fila)
                 $mapa = [];
                 for ($col = 1; $col <= $highestColIndex; $col++) {
-                    $mapa[$col] = $this->normValue($hoja->getCellByColumnAndRow($col, 1)->getValue());
+                    $colLetter = Coordinate::stringFromColumnIndex($col);
+                    $mapa[$col] = $this->normValue($hoja->getCell($colLetter . '1')->getValue());
                 }
 
                 $colALM = $this->buscarColumna($mapa, [
                     'ALM','ALMACEN','IDALMACEN','ID_ALMACEN',
                     'IDALM','CODALM','COD_ALM','CODALMACEN','COD_ALMACEN'
                 ]);
-                
-
 
                 if ($colALM === null) {
                     continue;
@@ -101,21 +102,20 @@ class MaterialController extends Controller
 
                 // escribir encabezados solo una vez
                 if ($encabezadosOriginales === null) {
-                    $encabezadosOriginales = [];
-                    for ($col = 1; $col <= $highestColIndex; $col++) {
-                        $encabezadosOriginales[] = $hoja->getCellByColumnAndRow($col, 1)->getValue();
-                    }
+                    $encabezadosOriginales = $data[0]; // fila 1
                     $sheetOut->fromArray([$encabezadosOriginales], null, 'A1');
                 }
 
-                // recorrer filas
+                // recorrer filas desde la 2
                 for ($row = 2; $row <= $highestRow; $row++) {
                     $fila = [];
+
                     for ($col = 1; $col <= $highestColIndex; $col++) {
-                        $cell  = $hoja->getCellByColumnAndRow($col, $row);
+                        $colLetter = Coordinate::stringFromColumnIndex($col);
+                        $cell = $hoja->getCell($colLetter . $row);
                         $valor = $cell->getValue();
 
-                        // 🔑 si es fecha => formatear a d/m/Y
+                        // ✅ Si es fecha, convertir a d/m/Y
                         if (Date::isDateTime($cell) && is_numeric($valor)) {
                             $valor = Date::excelToDateTimeObject($valor)->format('d/m/Y');
                         }
@@ -123,9 +123,9 @@ class MaterialController extends Controller
                         $fila[] = $valor;
                     }
 
-                    $valorALM    = isset($fila[$colALM - 1]) ? $this->normValue($fila[$colALM - 1]) : null;
-                
-                    if ($valorALM === $idAlmacen ) {
+                    $valorALM = isset($fila[$colALM - 1]) ? $this->normValue($fila[$colALM - 1]) : null;
+
+                    if ($valorALM === $idAlmacen) {
                         $sheetOut->fromArray([$fila], null, 'A' . $rowOut);
                         $rowOut++;
                     }
@@ -141,6 +141,7 @@ class MaterialController extends Controller
         $filePath = $dirPublic . '/' . $fileName;
 
         $writer = new Xlsx($spreadsheetOut);
+        $writer->setPreCalculateFormulas(false);
         $writer->save($filePath);
 
         session()->forget('archivos_excel');
