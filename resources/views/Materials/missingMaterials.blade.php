@@ -55,7 +55,7 @@
                                 <label for="ciudad" class="form-label">Ciudad</label>
                                 <input type="text" class="form-control" id="ciudad" name="ciudad" readonly>
                             </div>
-                            <button type="submit" class="btn btn-primary">Guardar Datos</button>
+                            <button type="submit" class="btn btn-primary" id="btn-send-bodega-id">Guardar Datos</button>
                         </form>
                     </div>
                 </div>
@@ -63,82 +63,91 @@
         </div>
 
     </section>
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            // Manejo del envío del formulario Excel
-            document.getElementById('excelUploadForm').addEventListener('submit', async function(e) {
-                e.preventDefault();
+@section('loader')
+    @include('admin.includes.components.loader')
+@endsection
 
-                const form = e.target;
-                const formData = new FormData(form);
-                const responseMsg = document.getElementById('responseMsg');
-                const btn_close_modal = document.querySelector('.btn-close-modal');
+<script>
+    let statusPet = false;
+    document.getElementById('excelUploadForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
 
-                try {
-                    const response = await fetch("{{ route('material.excelInput') }}", {
-                        method: "POST",
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Accept': 'application/json'
-                        },
-                        body: formData
-                    });
+        const form = e.target;
+        const formData = new FormData(form);
+        const responseMsg = document.getElementById('responseMsg');
+        const btn_close_modal = document.querySelector('.btn-close-modal');
+        const loader = document.querySelector('.box-loader');
 
-                    const data = await response.json();
+        loader.style.display = "flex";
 
-                    if (response.ok) {
-                        responseMsg.innerHTML =
-                            `<div class="alert-validation success">${data.message}</div>`;
-                        form.reset();
-                        // Mostrar modal para ingresar datos adicionales
-                        const modalEl = document.getElementById('extraDataModal');
-                        if (modalEl.parentElement !== document.body) {
-                            document.body.appendChild(modalEl);
+        try {
+            const response = await fetch("{{ route('material.excelInput') }}", {
+                method: "POST",
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: formData
+            });
 
-                        }
-                        const modal = new bootstrap.Modal(modalEl);
-                        modal.show();
-                        btn_close_modal.addEventListener('click', () => {
-                            modal.hide();
-                        });
-                    }
-                    // Desaparecer mensaje con fade después de 2 segundos
-                    setTimeout(() => {
-                        const alert = responseMsg.querySelector('.alert-validation');
-                        if (alert) {
-                            alert.classList.add('fade-out');
-                            setTimeout(() => {
-                                responseMsg.innerHTML = "";
-                            }, 500);
-                        }
-                    }, 2000);
+            const data = await response.json();
 
-                } catch (error) {
-                    console.error(error);
-                    responseMsg.innerHTML =
-                        `<div class="alert-validation error">Error inesperado</div>`;
-
-                    setTimeout(() => {
-                        const alert = responseMsg.querySelector('.alert-validation');
-                        if (alert) {
-                            alert.classList.add('fade-out');
-                            setTimeout(() => {
-                                responseMsg.innerHTML = "";
-                            }, 500);
-                        }
-                    }, 2000);
+            if (response.ok) {
+                responseMsg.innerHTML =
+                    `<div class="alert-validation success">${data.message}</div>`;
+                form.reset();
+                // Mostrar modal
+                const modalEl = document.getElementById('extraDataModal');
+                if (modalEl.parentElement !== document.body) {
+                    document.body.appendChild(modalEl);
                 }
-            });
+                const modal = new bootstrap.Modal(modalEl);
+                modal.show();
+                btn_close_modal.addEventListener('click', () => {
+                    modal.hide();
+                });
+            }
 
-            // Autocompletar ciudad cuando se selecciona bodega
-            const almacenSelect = document.getElementById('almacenId');
-            const ciudadInput = document.getElementById('ciudad');
+            // Desaparecer mensaje
+            setTimeout(() => {
+                const alert = responseMsg.querySelector('.alert-validation');
+                if (alert) {
+                    alert.classList.add('fade-out');
+                    setTimeout(() => {
+                        responseMsg.innerHTML = "";
+                    }, 500);
+                }
+            }, 2000);
 
-            almacenSelect.addEventListener('change', () => {
-                const selectedOption = almacenSelect.options[almacenSelect.selectedIndex];
-                const ciudad = selectedOption.getAttribute('data-ciudad') || '';
-                ciudadInput.value = ciudad;
-            });
+        } catch (error) {
+            console.error(error);
+            responseMsg.innerHTML =
+                `<div class="alert-validation error">Error inesperado</div>`;
+            statusPet = false;
+
+            setTimeout(() => {
+                const alert = responseMsg.querySelector('.alert-validation');
+                if (alert) {
+                    alert.classList.add('fade-out');
+                    setTimeout(() => {
+                        responseMsg.innerHTML = "";
+                    }, 500);
+                }
+            }, 2000);
+        } finally {
+            loader.style.display = "none";
+
+        }
+        // Autocompletar ciudad cuando se selecciona bodega
+        const almacenSelect = document.getElementById('almacenId');
+        const ciudadInput = document.getElementById('ciudad');
+
+        almacenSelect.addEventListener('change', () => {
+            const selectedOption = almacenSelect.options[almacenSelect.selectedIndex];
+            const ciudad = selectedOption.getAttribute('data-ciudad') || '';
+            ciudadInput.value = ciudad;
         });
-    </script>
+    });
+</script>
+
 @endsection

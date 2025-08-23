@@ -48,6 +48,7 @@
             <div class="main-content">
 
                 @yield('content')
+                @yield('loader')
             </div>
         </div>
     </div>
