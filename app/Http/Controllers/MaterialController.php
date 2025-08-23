@@ -4,11 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Shared\Date;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use OpenSpout\Reader\XLSX\Reader;
+use OpenSpout\Writer\XLSX\Writer;
+use OpenSpout\Common\Entity\Row;
+use Carbon\Carbon;
 
 class MaterialController extends Controller
 {
@@ -26,7 +25,7 @@ class MaterialController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'excel_files'   => 'required',
-            'excel_files.*' => 'mimes:xls,xlsx,xlsm|max:20480'
+            'excel_files.*' => 'mimes:xls,xlsx|max:20480'
         ]);
 
         if ($validator->fails()) {
@@ -64,85 +63,7 @@ class MaterialController extends Controller
             return response()->json(['message' => 'No hay archivos Excel cargados en la sesión.'], 400);
         }
 
-        $spreadsheetOut = new Spreadsheet();
-        $sheetOut = $spreadsheetOut->getActiveSheet();
-        $rowOut = 2;
-
-        $columnasExcluidas = ['APROV-ASEG', 'PILOTOS', 'DIF. LIMITES'];
-        $encabezadosFiltrados = null;
-
-        foreach ($archivosExcel as $archivo) {
-            $ruta = storage_path("app/public/" . $archivo['ruta']);
-
-            $reader = IOFactory::createReaderForFile($ruta);
-            $reader->setReadDataOnly(false);
-            $spreadsheet = $reader->load($ruta);
-
-            foreach ($spreadsheet->getAllSheets() as $hoja) {
-                $highestRow = $hoja->getHighestRow();
-                $highestCol = $hoja->getHighestColumn();
-                $highestColIndex = Coordinate::columnIndexFromString($highestCol);
-
-                $data = $hoja->toArray(null, false, false, false);
-
-                $mapa = [];
-                for ($col = 1; $col <= $highestColIndex; $col++) {
-                    $colLetter = Coordinate::stringFromColumnIndex($col);
-                    $mapa[$col] = $this->normValue($hoja->getCell($colLetter . '1')->getValue());
-                }
-
-                $colALM = $this->buscarColumna($mapa, [
-                    'ALM','ALMACEN','IDALMACEN','ID_ALMACEN',
-                    'IDALM','CODALM','COD_ALM','CODALMACEN','COD_ALMACEN'
-                ]);
-
-                if ($colALM === null) {
-                    continue;
-                }
-
-                $columnasPermitidas = [];
-                foreach ($mapa as $index => $encabezado) {
-                    if (!in_array($encabezado, $columnasExcluidas)) {
-                        $columnasPermitidas[] = $index;
-                    }
-                }
-
-                if ($encabezadosFiltrados === null) {
-                    $encabezadosFiltrados = [];
-                    foreach ($columnasPermitidas as $index) {
-                        $encabezadosFiltrados[] = $data[0][$index - 1];
-                    }
-                    $sheetOut->fromArray([$encabezadosFiltrados], null, 'A1');
-                }
-
-                for ($row = 2; $row <= $highestRow; $row++) {
-                    $filaOriginal = [];
-                    for ($col = 1; $col <= $highestColIndex; $col++) {
-                        $colLetter = Coordinate::stringFromColumnIndex($col);
-                        $cell = $hoja->getCell($colLetter . $row);
-                        $valor = $cell->getValue();
-
-                        if (Date::isDateTime($cell) && is_numeric($valor)) {
-                            $valor = Date::excelToDateTimeObject($valor)->format('d/m/Y');
-                        }
-
-                        $filaOriginal[] = $valor;
-                    }
-
-                    $valorALM = isset($filaOriginal[$colALM - 1]) ? $this->normValue($filaOriginal[$colALM - 1]) : null;
-
-                    if ($valorALM === $idAlmacen) {
-                        $filaFiltrada = [];
-                        foreach ($columnasPermitidas as $index) {
-                            $filaFiltrada[] = $filaOriginal[$index - 1];
-                        }
-                        $sheetOut->fromArray([$filaFiltrada], null, 'A' . $rowOut);
-                        $rowOut++;
-                    }
-                }
-            }
-        }
-
+        // Preparar archivo de salida
         $fileName = 'MatFiltrados' . time() . '.xlsx';
         $dirPublic = storage_path('app/public/excels');
         if (!is_dir($dirPublic)) {
@@ -150,9 +71,81 @@ class MaterialController extends Controller
         }
         $filePath = $dirPublic . '/' . $fileName;
 
-        $writer = new Xlsx($spreadsheetOut);
-        $writer->setPreCalculateFormulas(false);
-        $writer->save($filePath);
+        $writer = new Writer();
+        $writer->openToFile($filePath);
+
+        $encabezadosEscritos = false;
+        $headersMap = []; // Guardar nombres de columnas por índice
+
+        foreach ($archivosExcel as $archivo) {
+            $ruta = storage_path("app/public/" . $archivo['ruta']);
+            $reader = new Reader();
+            $reader->open($ruta);
+
+            foreach ($reader->getSheetIterator() as $sheet) {
+                $rowCount = 0;
+                $columnasPermitidas = [];
+                $colALM = null;
+
+                foreach ($sheet->getRowIterator() as $row) {
+                    $cells = $row->toArray();
+                    $rowCount++;
+
+                    if ($rowCount === 1) {
+                        // --- ENCABEZADOS ---
+                        $columnasExcluidas = ['APROV-ASEG', 'PILOTOS', 'DIF. LIMITES'];
+                        $mapa = array_map([$this, 'normValue'], $cells);
+
+                        foreach ($mapa as $i => $val) {
+                            if (!in_array($val, $columnasExcluidas)) {
+                                $columnasPermitidas[] = $i;
+                                $headersMap[$i] = $cells[$i]; // Guardar nombre real de la columna
+                            }
+                        }
+
+                        if (!$encabezadosEscritos) {
+                            $encabezados = [];
+                            foreach ($columnasPermitidas as $i) {
+                                $encabezados[] = $cells[$i];
+                            }
+                            $rowEncabezado = Row::fromValues($encabezados);
+                            $writer->addRow($rowEncabezado);
+                            $encabezadosEscritos = true;
+                        }
+
+                        // Guardamos la posición de ALM
+                        $colALM = array_search('ALM', $mapa);
+                        continue;
+                    }
+
+                    // --- FILAS ---
+                    if (isset($colALM) && $this->normValue($cells[$colALM]) === $idAlmacen) {
+                        $filaFiltrada = [];
+                        foreach ($columnasPermitidas as $i) {
+                            $valor = $cells[$i];
+
+                            // Formatear fechas solo en las columnas correctas
+                            if (in_array(strtoupper(trim($headersMap[$i])), ['FECHA', 'FECHA_CARGA', 'FECHA PEDIDO'])) {
+                                try {
+                                    $fecha = Carbon::parse($valor);
+                                    $valor = $fecha->format('j/m/Y'); 
+                                } catch (\Exception $e) {
+                                    // si no se puede parsear, dejar valor original
+                                }
+                            }
+
+                            $filaFiltrada[] = $valor;
+                        }
+                        $rowData = Row::fromValues($filaFiltrada);
+                        $writer->addRow($rowData);
+                    }
+                }
+            }
+
+            $reader->close();
+        }
+
+        $writer->close();
 
         session()->forget('archivos_excel');
 
@@ -162,15 +155,5 @@ class MaterialController extends Controller
     private function normValue($value)
     {
         return strtoupper(trim((string) $value));
-    }
-
-    private function buscarColumna(array $mapa, array $nombres)
-    {
-        foreach ($mapa as $index => $encabezado) {
-            if (in_array($encabezado, $nombres)) {
-                return $index;
-            }
-        }
-        return null;
     }
 }
