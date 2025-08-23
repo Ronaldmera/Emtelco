@@ -68,7 +68,7 @@
 @endsection
 
 <script>
-    let statusPet = false;
+    //subir archivos excel
     document.getElementById('excelUploadForm').addEventListener('submit', async function(e) {
         e.preventDefault();
 
@@ -96,6 +96,7 @@
                 responseMsg.innerHTML =
                     `<div class="alert-validation success">${data.message}</div>`;
                 form.reset();
+
                 // Mostrar modal
                 const modalEl = document.getElementById('extraDataModal');
                 if (modalEl.parentElement !== document.body) {
@@ -136,8 +137,8 @@
             }, 2000);
         } finally {
             loader.style.display = "none";
-
         }
+
         // Autocompletar ciudad cuando se selecciona bodega
         const almacenSelect = document.getElementById('almacenId');
         const ciudadInput = document.getElementById('ciudad');
@@ -147,6 +148,62 @@
             const ciudad = selectedOption.getAttribute('data-ciudad') || '';
             ciudadInput.value = ciudad;
         });
+    });
+
+    //clik en el boton del modal
+    document.getElementById('btn-send-bodega-id').addEventListener('click', async function(e) {
+        e.preventDefault();
+
+        const loader = document.querySelector('.box-loader');
+        const modalEl = document.getElementById('extraDataModal');
+        const almacenSelect = document.getElementById('almacenId');
+        const ciudadInput = document.getElementById('ciudad');
+
+        loader.style.display = "flex";
+
+        try {
+            const almacenId = almacenSelect.value;
+
+            const response = await fetch("{{ route('material.modalData') }}", {
+                method: "POST",
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: new URLSearchParams({
+                    almacen_id: almacenId
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Lanzar descarga
+                window.location.href = data.file;
+            } else {
+                alert("Error: " + data.message);
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Error inesperado");
+        } finally {
+            loader.style.display = "none";
+            const modalEl = document.getElementById('extraDataModal');
+            modalEl.classList.remove("show");
+            modalEl.classList.add("fade-out");
+
+            // Después de la transición, ocultarlo del todo
+            setTimeout(() => {
+                modalEl.style.display = "none";
+                modalEl.classList.remove("fade-out");
+                document.body.classList.remove("modal-open");
+                document.querySelectorAll(".modal-backdrop").forEach(el => el.remove());
+
+                // Resetear campos
+                almacenSelect.value = "";
+                ciudadInput.value = "";
+            }, 200);
+        }
     });
 </script>
 

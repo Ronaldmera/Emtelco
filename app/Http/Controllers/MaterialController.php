@@ -149,7 +149,10 @@ class MaterialController extends Controller
 
         session()->forget('archivos_excel');
 
-        return response()->download($filePath);
+       return response()->json([
+            'message' => 'Archivo generado correctamente',
+            'file' => asset('storage/excels/' . $fileName)
+        ]);
     }
 
     private function normValue($value)
