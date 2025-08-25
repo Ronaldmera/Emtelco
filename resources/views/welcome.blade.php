@@ -1,25 +1,34 @@
 @extends('admin.layouts.app')
+
 @section('content')
     <section class="section">
         <div class="section-header">
             <h1>Página de Inicio</h1>
         </div>
+
         <nav aria-label="breadcrumb">
-            <ol class="breadcrumb ">
+            <ol class="breadcrumb">
                 <li class="breadcrumb-item active" aria-current="page">Inicio</li>
             </ol>
         </nav>
-        <div class="row justify-content-center align-items-center">
-            <div class="col-md-6 text-center d-flex flex-column justify-content-center align-items-center">
-                <h2 class="bg-light p-4 rounded w-100 py-5">
-                    ¡Bienvenidas a
-                    <span class="text-info">AdminE</span>!<br>
-                    Tu panel de control para una gestión eficiente y organizada.
-                    <i class="bi bi-house-door-fill text-info display-4 d-block mt-2 mt-sm-4"></i>
-                </h2>
+
+        <div class="row align-items-center">
+            <!-- Texto de bienvenida -->
+            <div class="col-12 col-md-5 mb-4 mb-md-0">
+                <div class="text-center shadow-sm p-4 bg-body rounded h-100 d-flex flex-column justify-content-center">
+                    <h2 class="fw-bold">
+                        ¡Bienvenidos a
+                        <span class="color-secundario">AdminE</span>!
+                    </h2>
+                    <p class="mt-3 welcome-text">
+                        Tu panel de control para una gestión eficiente y organizada.
+                    </p>
+                    <i class="bi bi-house-door-fill purple-secondary-color display-4 mt-3"></i>
+                </div>
             </div>
-            <div class="col-md-6">
-                <img src="backend/assets/img/Index/img_Experiencia.png" alt="Imagen de experiencia" class="img-fluid">
+            <div class="col-12 col-md-7">
+                <img src="{{ asset('backend/assets/img/Index/emtelco.jpg') }}" alt="Equipo de Emtelco celebrando"
+                    class="img-fluid rounded shadow-sm">
             </div>
         </div>
     </section>
