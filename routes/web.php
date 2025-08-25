@@ -1,12 +1,16 @@
 <?php
 
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MaterialController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('welcome');
+Route::controller(HomeController::class)->group(function () {
+    Route::get('/',  'index')->name('home.index');
+  });
 
-Route::get('/missingMaterials', [MaterialController::class, 'showMissingMaterials'])->name('material.showMissingMaterials');
-Route::post('/uploadExcel', [MaterialController::class, 'excelInput'])->name('material.excelInput');
-Route::post('/modalData', [MaterialController::class, 'modalData'])->name('material.modalData');
+Route::controller(MaterialController::class)->group(function () {
+    Route::get('materials/missingMaterials',  'showMissingMaterials')->name('material.showMissingMaterials');
+    Route::post('materials/uploadExcel', 'excelInput')->name('material.excelInput');
+    Route::post('materials/modalData','modalData')->name('material.modalData');
+  });
+
