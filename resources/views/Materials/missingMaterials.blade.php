@@ -157,12 +157,13 @@
         const loader = document.querySelector('.box-loader');
         const modalEl = document.getElementById('extraDataModal');
         const almacenSelect = document.getElementById('almacenId');
-        const ciudadInput = document.getElementById('ciudad');
+        const ciudadInput = document.getElementById('ciudad').value;
 
         loader.style.display = "flex";
 
         try {
             const almacenId = almacenSelect.value;
+
 
             const response = await fetch("{{ route('material.modalData') }}", {
                 method: "POST",
@@ -171,7 +172,8 @@
                     'Accept': 'application/json'
                 },
                 body: new URLSearchParams({
-                    almacen_id: almacenId
+                    almacen_id: almacenId,
+                    ciudad: ciudadInput
                 })
             });
 

@@ -57,6 +57,7 @@ class MaterialController extends Controller
     public function modalData(Request $request)
     {
         $idAlmacen = $this->normValue($request->input('almacen_id'));
+        $ciudad = $this->normValue($request->input('ciudad'));
 
         $archivosExcel = session('archivos_excel', []);
         if (empty($archivosExcel)) {
@@ -64,7 +65,7 @@ class MaterialController extends Controller
         }
 
         // Preparar archivo de salida
-        $fileName = 'MatFiltrados' . time() . '.xlsx';
+        $fileName = 'MatFiltrados_'.$ciudad.time().'.xlsx';
         $dirPublic = storage_path('app/public/excels');
         if (!is_dir($dirPublic)) {
             @mkdir($dirPublic, 0775, true);
