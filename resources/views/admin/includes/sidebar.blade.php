@@ -3,7 +3,7 @@
          <div class="sidebar-brand pt-3">
              <a href="{{ route('home.index') }}">
                  <img src="{{ asset('backend/assets/img/LogoEmtelco/Logo_Emtelco.png') }}" alt=""
-                     class="w-50 h-75 ">
+                     class="w-50 h-100">
              </a>
          </div>
          <div class="sidebar-brand sidebar-brand-sm pt-3">
