@@ -1,12 +1,12 @@
  <div class="main-sidebar sidebar-style-2">
      <aside id="sidebar-wrapper">
-         <div class="sidebar-brand">
+         <div class="sidebar-brand pt-3">
              <a href="{{ route('home.index') }}">
                  <img src="{{ asset('backend/assets/img/LogoEmtelco/Logo_Emtelco.png') }}" alt=""
-                     class="w-50 h-75">
+                     class="w-50 h-75 ">
              </a>
          </div>
-         <div class="sidebar-brand sidebar-brand-sm">
+         <div class="sidebar-brand sidebar-brand-sm pt-3">
              <a href="{{ route('home.index') }}">
                  <img src="{{ asset('backend/assets/img/LogoEmtelco/Logo_Emtelco.png') }}" alt=""
                      class="w-75 h-75">

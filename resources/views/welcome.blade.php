@@ -13,12 +13,10 @@
         </nav>
 
         <div class="row align-items-center">
-            <!-- Texto de bienvenida -->
             <div class="col-12 col-md-5 mb-4 mb-md-0">
                 <div class="text-center shadow-sm p-4 bg-body rounded h-100 d-flex flex-column justify-content-center">
-                    <h2 class="fw-bold">
-                        ¡Bienvenidos a
-                        <span class="color-secundario">AdminE</span>!
+                    <h2 class="fw-bold purple-secondary-color">
+                        ¡Bienvenidos a AdminE!
                     </h2>
                     <p class="mt-3 welcome-text">
                         Tu panel de control para una gestión eficiente y organizada.
@@ -27,7 +25,7 @@
                 </div>
             </div>
             <div class="col-12 col-md-7">
-                <img src="{{ asset('backend/assets/img/Index/emtelco.jpg') }}" alt="Equipo de Emtelco celebrando"
+                <img src="{{ asset('backend/assets/img/Index/emtelco.png') }}" alt="Equipo de Emtelco celebrando"
                     class="img-fluid rounded shadow-sm">
             </div>
         </div>
