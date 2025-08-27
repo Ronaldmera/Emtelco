@@ -14,7 +14,7 @@
         {{-- mensaje de respuesta --}}
         <div id="responseMsg"></div>
 
-        <div class="container mt-4 py-4 col-12 col-md-6">
+        <div class="container mt-4 py-4 col-12 col-md-6 bg-white shadow-sm rounded">
             <form id="excelUploadForm" method="POST" action="{{ route('material.excelInput') }}"
                 enctype="multipart/form-data">
                 @csrf
