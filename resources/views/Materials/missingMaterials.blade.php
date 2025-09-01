@@ -31,7 +31,7 @@
             </form>
         </div>
         {{-- Modal para datos adicionales  --}}
-        <div class="modal fade mt-5 " id="extraDataModal" tabindex="-1" aria-labelledby="extraDataModalLabel"
+        <div class="modal fade mt-5 pt-5" id="extraDataModal" tabindex="-1" aria-labelledby="extraDataModalLabel"
             aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -110,8 +110,10 @@
                 btn_close_modal.addEventListener('click', () => {
                     modal.hide();
                 });
+            } else {
+                responseMsg.innerHTML =
+                    `<div class="alert-validation error">${data.message}</div>`;
             }
-
             // Desaparecer mensaje
             setTimeout(() => {
                 const alert = responseMsg.querySelector('.alert-validation');

@@ -57,6 +57,12 @@
 :root {
     --color-secundario: #30287c;
 }
+/*estilo para mensaje de validacion al subir archivos*/
+.alert-validation {
+    position: absolute;
+    top: 1vh;
+}
+
 .purple-secondary-color {
     color: var(--color-secundario) !important;
 }

@@ -30,7 +30,7 @@ class MaterialController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'message' => 'Error al subir los archivos.'
+                'message' => 'Error al subir los archivos.',
             ], 422);
         }
 
