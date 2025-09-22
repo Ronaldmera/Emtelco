@@ -8,7 +8,8 @@
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ route('home.index') }}">Inicio</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Materiales Faltantes</li>
+                <li class="breadcrumb-item">Materiales Faltantes</li>
+                <li class="breadcrumb-item active" aria-current="page">Filtrar Registros</li>
             </ol>
         </nav>
         {{-- mensaje de respuesta --}}

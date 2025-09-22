@@ -160,4 +160,11 @@ class MaterialController extends Controller
     {
         return strtoupper(trim((string) $value));
     }
+    public function showViewExport()
+    {
+        return view('Materials.exportMissingMaterials');
+    }
+    public function filterMissingMaterials(){
+        
+    }
 }

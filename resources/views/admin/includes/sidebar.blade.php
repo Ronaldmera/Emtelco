@@ -25,7 +25,7 @@
                                  class="bi bi-funnel text-primary"></i><span>Filtrar
                                  Registros</span></a>
                      </li>
-                     <li><a class="nav-link" href="#"><i
+                     <li><a class="nav-link" href="{{ route('material.showViewExport') }}"><i
                                  class="bi bi-box-arrow-down text-primary"></i><span>Generar Exporte
                              </span></a>
                      </li>
