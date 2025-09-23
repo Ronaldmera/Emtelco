@@ -25,14 +25,14 @@
         </div>
 
         <div class="container mt-4 py-4 col-12 col-md-6 bg-white shadow-sm rounded">
-            <form id="excelUploadForm" method="POST" data-url="{{ route('material.excelInput') }}"
+            <form id="excelUploadForm" method="POST" data-url="{{ route('material.filterMissingMaterials') }}"
                 enctype="multipart/form-data">
                 @csrf
                 <div class="mb-3 ">
-                    <label for="excelFile" class="form-label">Subir archivos Excel</label>
+                    <label for="excelFile" class="form-label">Subir archivo Excel</label>
                     <br>
                     <input class="form-control btn btn-outline-primary w-100" type="file" id="excelFile"
-                        name="excel_files[]" accept=".xls, .xlsx, .xlsm" multiple required>
+                        name="excel_file" accept=".xls, .xlsx, .xlsm" required>
                 </div>
                 <button type="submit" class="btn btn-primary">
                     <i class="bi bi-cloud-arrow-up-fill me-2 "></i> Subir
@@ -47,7 +47,7 @@
 @endsection
 
 @section('scripts')
-    <script src="{{ asset('backend/assets/js/missingMaterials.js') }}"></script>
+    <script src="{{ asset('backend/assets/js/exportMissingMaterials.js') }}"></script>
 @endsection
 
 @endsection

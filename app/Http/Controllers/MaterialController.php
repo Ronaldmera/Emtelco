@@ -164,7 +164,79 @@ class MaterialController extends Controller
     {
         return view('Materials.exportMissingMaterials');
     }
-    public function filterMissingMaterials(){
-        
+public function filterMissingMaterials(Request $request)
+{
+    if (!$request->hasFile('excel_file')) {
+        return response()->json(['message' => 'No se recibió ningún archivo.'], 400);
     }
+
+    $file = $request->file('excel_file');
+
+    // Guardar archivo temporalmente
+    $rutaTemporal = $file->storeAs(
+        'excels/temp',
+        'archivo_' . time() . '.' . $file->getClientOriginalExtension(),
+        'public'
+    );
+
+    $ruta = storage_path("app/public/" . $rutaTemporal);
+
+    // Preparar archivo de salida
+    $fileName = 'Materiales_Faltantes_' . time() . '.xlsx';
+    $dirPublic = storage_path('app/public/excels');
+    if (!is_dir($dirPublic)) {
+        @mkdir($dirPublic, 0775, true);
+    }
+    $filePath = $dirPublic . '/' . $fileName;
+
+    $writer = new Writer();
+    $writer->openToFile($filePath);
+
+    $reader = new Reader();
+    $reader->open($ruta);
+
+    $encabezadosEscritos = false;
+
+    foreach ($reader->getSheetIterator() as $sheet) {
+        $rowCount = 0;
+
+        foreach ($sheet->getRowIterator() as $row) {
+            $cells = $row->toArray();
+            $rowCount++;
+
+            if ($rowCount === 1) {
+                // Escribir encabezados + columna TOTAL
+                $cells[] = 'TOTAL';
+                if (!$encabezadosEscritos) {
+                    $writer->addRow(Row::fromValues($cells));
+                    $encabezadosEscritos = true;
+                }
+                continue;
+            }
+
+            // Columnas AM y AN -> índices 38 y 39
+            $cantidadTecnico = (float) ($cells[38] ?? 0);
+            $cantidadDescarga = (float) ($cells[39] ?? 0);
+            $total = $cantidadTecnico - $cantidadDescarga;
+
+            $cells[] = $total;
+
+            // Guardar solo si TOTAL ≠ 0
+            if ($total != 0) {
+                $writer->addRow(Row::fromValues($cells));
+            }
+        }
+    }
+
+    $reader->close();
+    $writer->close();
+
+    // Retornar el archivo generado
+    return response()->json([
+        'message' => 'Archivo generado correctamente',
+        'file'    => asset('storage/excels/' . $fileName)
+    ]);
+}
+
+
 }

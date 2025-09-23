@@ -13,5 +13,6 @@ Route::controller(MaterialController::class)->group(function () {
     Route::post('materials/uploadExcel','excelInput')->name('material.excelInput');
     Route::post('materials/modalData','modalData')->name('material.modalData');
     Route::get('materials/missingMaterials/exportMissingMaterials','showViewExport')->name('material.showViewExport');
+    Route::post('materials/missingMaterials/uploadFile','filterMissingMaterials')->name('material.filterMissingMaterials');
   });
 
