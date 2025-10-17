@@ -129,6 +129,7 @@ document
 
             // Después de la transición, ocultarlo del todo
             setTimeout(() => {
+                responseMsg.innerHTML = `<div class="alert-validation success">Exportado con éxito</div>`;
                 modalEl.style.display = "none";
                 modalEl.classList.remove("fade-out");
                 document.body.classList.remove("modal-open");
@@ -139,6 +140,9 @@ document
                 // Resetear campos
                 almacenSelect.value = "";
                 document.getElementById("ciudad").value = "";
+                setTimeout(() => {
+                    responseMsg.innerHTML = "";
+                }, 3000);
             }, 200);
         }
     });
