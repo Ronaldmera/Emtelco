@@ -9,5 +9,3 @@ AdminE es un sistema diseñado para automatizar y unificar registros proveniente
 - Integración de múltiples archivos Excel en un solo flujo de trabajo.
 - Selección dinámica de archivos y procesamiento según criterios definidos.
 - Reducción de carga operativa manual.
-
-
